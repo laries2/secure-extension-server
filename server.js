@@ -35,36 +35,22 @@ function getExpiry(days) {
 }
 
 // ==============================
-// 🔐 MAIN LICENSE CHECK
+// 🔐 MAIN LICENSE CHECK (WITH FP)
 // ==============================
 app.get("/script", (req, res) => {
-    try {
-        const key = req.query.key;
-        const keys = loadKeys();
-        const user = keys[key];
 
-        console.log("🔑 Request with key:", key);
+    const key = req.query.key;
+    const fingerprint = req.query.fp;
 
-        const GLOBAL_KILL = false;
+    console.log(`🚫 Blocked request | Key: ${key} | FP: ${fingerprint}`);
 
-        if (GLOBAL_KILL) {
-            return res.json({ allowed: false, kill: true });
-        }
-
-        if (!user) return res.json({ allowed: false, kill: false });
-        if (!user.active) return res.json({ allowed: false, kill: false });
-
-        const now = new Date();
-        const expiry = new Date(user.expires);
-
-        if (now > expiry) return res.json({ allowed: false, kill: false });
-
-        res.json({ allowed: true, kill: false });
-
-    } catch (err) {
-        console.error("Server error:", err);
-        res.status(500).json({ allowed: false, kill: false });
-    }
+    return res.status(403).json({
+        allowed: false,
+        kill: true,
+        error: "OUTDATED_VERSION",
+        message: "This version is no longer supported.",
+        contact: "WhatsApp 0700373370"
+    });
 });
 
 // ==============================
@@ -87,7 +73,8 @@ app.get("/generate-key", (req, res) => {
 
     keys[newKey] = {
         expires: getExpiry(days),
-        active: true
+        active: true,
+        devices: [] // 🔥 important
     };
 
     saveKeys(keys);
@@ -128,5 +115,5 @@ app.get("/revoke-key", (req, res) => {
 // 🚀 START SERVER
 // ==============================
 app.listen(PORT, () => {
-    console.log(`🚀 Server running at http://127.0.0.1:${PORT}`);
+    console.log(`🚀 Server running on port ${PORT}`);
 });

@@ -8,6 +8,10 @@ app.use(cors());
 
 const PORT = process.env.PORT || 3000;
 const keysFilePath = path.join(__dirname, "keys.json");
+newFunction();
+function newFunction() {
+    console.log(`🚀 Extension has been moved`);
+}
 
 // 🔹 Load keys
 function loadKeys() {
